@@ -12,7 +12,7 @@ router = APIRouter()
 @router.get("/schema")
 def get_schema(_=Depends(get_current_user), playground_db: Session = Depends(get_playground_db)):
     schema_query = """
-                   SELECT table_name, column_name, data_type
+                   SELECT table_name, column_name, column_type, is_nullable
                    FROM information_schema.columns
                    WHERE table_schema = DATABASE()
                    ORDER BY table_name, ordinal_position;
@@ -23,7 +23,8 @@ def get_schema(_=Depends(get_current_user), playground_db: Session = Depends(get
         table = row._mapping['TABLE_NAME']
         col = {
             'column_name': row._mapping['COLUMN_NAME'],
-            'data_type': row._mapping['DATA_TYPE']
+            'column_type': row._mapping['COLUMN_TYPE'],
+            'is_nullable': row._mapping['IS_NULLABLE'] == 'YES'
         }
         schema_info.setdefault(table, []).append(col)
 
