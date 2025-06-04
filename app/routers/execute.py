@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database import get_playground_db
 from app.deps.auth import get_current_user
 from app.utils.response import api_response
-from app.utils.serialize import row_to_jsonable
+from app.utils.serialize import row_to_jsonable_array
 
 router = APIRouter()
 
@@ -42,5 +42,11 @@ def execute_query(
     query = validate_query(payload.get("query"))
 
     result = playground_db.execute(text(query))
-    rows = [row_to_jsonable(row) for row in result.mappings().fetchall()]
-    return api_response({"result": rows})
+
+    columns = list(result.keys())
+    rows = [row_to_jsonable_array(row, columns) for row in result.fetchall()]
+
+    return api_response({
+        "columns": columns,
+        "result": rows
+    })

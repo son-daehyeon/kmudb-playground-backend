@@ -1,4 +1,4 @@
-def row_to_jsonable(row):
+def row_to_jsonable_array(row, columns):
     import datetime
     from decimal import Decimal
     import uuid
@@ -14,7 +14,6 @@ def row_to_jsonable(row):
         elif isinstance(v, uuid.UUID):
             return str(v)
         elif isinstance(v, (bytes, bytearray)):
-            # base64 인코딩 (혹은 str(v) 가능)
             return base64.b64encode(v).decode('utf-8')
         elif isinstance(v, (set, frozenset)):
             return list(v)
@@ -25,4 +24,4 @@ def row_to_jsonable(row):
         else:
             return v
 
-    return {k: convert(v) for k, v in dict(row).items()}
+    return [convert(value) for value in row]

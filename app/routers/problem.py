@@ -7,7 +7,7 @@ from app.deps.auth import get_current_user
 from app.models import Problem, Submission
 from app.routers.execute import validate_query
 from app.utils.response import api_response
-from app.utils.serialize import row_to_jsonable
+from app.utils.serialize import row_to_jsonable_array
 
 router = APIRouter()
 
@@ -56,14 +56,19 @@ def get_problem(problem_id: int,
         query = None
 
     result = playground_db.execute(text(problem.query))
-    example_answer = [row_to_jsonable(row) for row in result.mappings().fetchmany(3)]
+
+    columns = list(result.keys())
+    rows = [row_to_jsonable_array(row, columns) for row in result.fetchmany(3)]
 
     return api_response({
         "id": problem.id,
         "description": problem.description,
         "solved": solved,
         "query": query,
-        "example": example_answer
+        "example": {
+            "columns": columns,
+            "result": rows
+        }
     })
 
 
